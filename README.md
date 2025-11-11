@@ -1,0 +1,2 @@
+# mrn
+A compression algorithm
