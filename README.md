@@ -33,7 +33,7 @@ MRN 是一款高性能的插件化压缩工具，采用 MoveRun 压缩算法管�
 
 ```bash
 # 克隆仓库（如果适用）
-git clone <repository-url>
+git clone https://github.com/lezi-fun/mrn.git
 cd mrn
 
 # 配置构建
