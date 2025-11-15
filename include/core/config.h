@@ -16,6 +16,7 @@ struct CompressionPreset {
     static CompressionPreset createBinaryPreset();
     static CompressionPreset createMaximumPreset();
     static CompressionPreset createFastPreset();
+    static CompressionPreset createStorePreset(); // 存储模式（不压缩）
 };
 
 class ConfigurationManager {

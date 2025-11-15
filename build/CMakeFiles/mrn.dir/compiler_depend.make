@@ -3981,6 +3981,7 @@ CMakeFiles/mrn.dir/src/core/compressor.cpp.o: /Users/desktop/mrn/src/core/compre
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stdint.h \
   /Users/desktop/mrn/include/core/archive_format.h \
   /Users/desktop/mrn/include/core/compressor.h \
+  /Users/desktop/mrn/include/core/config.h \
   /Users/desktop/mrn/include/core/plugin_interface.h \
   /Users/desktop/mrn/include/core/plugin_manager.h \
   /Users/desktop/mrn/include/io/archive_writer.h \
@@ -8956,6 +8957,7 @@ CMakeFiles/mrn.dir/src/main.cpp.o: /Users/desktop/mrn/src/main.cpp \
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stddef.h \
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stdint.h \
   /Users/desktop/mrn/include/core/compressor.h \
+  /Users/desktop/mrn/include/core/config.h \
   /Users/desktop/mrn/include/core/plugin_interface.h \
   /Users/desktop/mrn/include/core/plugin_manager.h \
   /Users/desktop/mrn/include/io/directory_scanner.h \

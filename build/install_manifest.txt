@@ -1,0 +1,16 @@
+/usr/local/bin/mrn
+/usr/local/include/mrn/core/config.h
+/usr/local/include/mrn/core/archive_format.h
+/usr/local/include/mrn/core/plugin_interface.h
+/usr/local/include/mrn/core/compressor.h
+/usr/local/include/mrn/core/plugin_manager.h
+/usr/local/include/mrn/io/file_io.h
+/usr/local/include/mrn/io/archive_writer.h
+/usr/local/include/mrn/io/directory_scanner.h
+/usr/local/include/mrn/algorithms/move_optimizer.h
+/usr/local/include/mrn/algorithms/huffman_encoder.h
+/usr/local/include/mrn/algorithms/lz77_compressor.h
+/usr/local/include/mrn/algorithms/algorithm_base.h
+/usr/local/include/mrn/utils/progress_tracker.h
+/usr/local/include/mrn/utils/thread_pool.h
+/usr/local/include/mrn/utils/logger.h

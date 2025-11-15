@@ -326,6 +326,7 @@ struct CompressionPreset {
     static CompressionPreset createBinaryPreset(); 
     static CompressionPreset createMaximumPreset();
     static CompressionPreset createFastPreset();
+    static CompressionPreset createStorePreset(); // 存储模式（不压缩）
 };
 
 class ConfigurationManager {
@@ -344,6 +345,69 @@ private:
     std::map<std::string, std::string> fileAssociations_;
 };
 ```
+
+### 3. 文件类型自动优化策略
+
+系统根据文件扩展名自动选择最优压缩策略：
+
+#### 直接存储（Store模式）
+以下文件类型通常已高度压缩，直接存储不进行二次压缩：
+- **视频文件**: mp4, avi, mkv, mov, wmv, flv, webm, m4v, mpg, mpeg, 3gp, ogv, ts, mts
+- **音频文件**: mp3, aac, ogg, wma, flac, m4a, wav, opus, ape
+- **已压缩归档**: zip, gz, bz2, xz, 7z, rar, tar, cab, iso, dmg
+
+#### 快速压缩（Fast模式）
+以下文件类型可能仍有少量冗余，使用快速压缩：
+- **已压缩图片**: jpg, jpeg, png, gif, webp
+- **PDF文档**: pdf
+- **Office文档**: doc, docx, xls, xlsx, ppt, pptx, odt, ods, odp
+
+#### 文本压缩（Text模式）
+以下文件类型适合文本压缩算法：
+- **纯文本**: txt, md, rst, log, csv
+- **源代码**: cpp, hpp, c, h, java, py, js, ts, go, rs, swift, kt, scala, php, rb, pl, sh, bash
+- **标记语言**: xml, html, htm, css, scss, json, yaml, yml, toml, ini, conf, config, properties
+
+#### 二进制压缩（Binary模式）
+以下文件类型使用二进制压缩：
+- **未压缩图片**: bmp, tiff, tif, raw, psd
+- **可执行文件**: exe, dll, so, dylib, bin, app, deb, rpm, pkg
+- **数据库文件**: db, sqlite, sqlite3, mdb
+- **其他二进制文件**: 默认使用此模式
+
+### 4. 智能压缩决策实现
+
+在 `compressSingleFile` 中实现智能压缩决策逻辑：
+
+```cpp
+FileCompressionResult ModularCompressor::compressSingleFile(...) {
+    auto data = FileIO::readFile(filepath);
+    
+    // 如果设置了跳过压缩（如视频、已压缩文件），直接存储
+    if (options.skipCompression) {
+        result.result.compressedData = data;
+        result.result.uncompressedSize = data.size();
+        result.result.isCompressed = false;
+    } else {
+        // 执行压缩
+        result.result = algorithm->compress(buildParams(pipeline, options), data);
+        
+        // 如果压缩后反而更大，使用原始数据
+        if (result.result.compressedData.size() >= data.size()) {
+            result.result.compressedData = data;
+            result.result.isCompressed = false;
+        }
+    }
+    
+    return result;
+}
+```
+
+**优化效果**：
+1. **视频/音频文件**：自动检测扩展名，设置 `skipCompression=true`，直接存储，节省大量时间
+2. **已压缩文件**：自动识别并跳过压缩，避免无效压缩
+3. **负压缩保护**：如果压缩后反而更大，自动回退到原始数据
+4. **混合目录**：压缩目录时，每个文件根据类型自动选择最优策略
 
 ## 多线程优化
 

@@ -100,11 +100,25 @@ CompressionResult ModularCompressor::compressDirectory(const std::string& inputD
         }
     }
 
-    // 多线程压缩
+    // 多线程压缩，每个文件根据类型自动选择最佳预设
     std::vector<std::future<FileCompressionResult>> futures;
+    bool useAutoPreset = (options.verbose || true); // 总是为每个文件检测最佳预设
     for (const auto& file : fileList) {
-        futures.push_back(threadPool_->enqueue([this, file, pipeline, options] {
-            return compressSingleFile(file.path, file.relativePath, pipeline, options);
+        futures.push_back(threadPool_->enqueue([this, file, pipeline, options, useAutoPreset] {
+            CompressionPipeline filePipeline = pipeline;
+            CompressionOptions fileOptions = options;
+            
+            // 为每个文件检测最佳预设（智能文件类型优化）
+            if (useAutoPreset) {
+                ConfigurationManager configMgr;
+                CompressionPreset preset = configMgr.detectBestPreset(file.path);
+                filePipeline = preset.pipeline;
+                fileOptions = preset.options;
+                fileOptions.verbose = options.verbose;
+                fileOptions.overwrite = options.overwrite;
+            }
+            
+            return compressSingleFile(file.path, file.relativePath, filePipeline, fileOptions);
         }));
     }
 
@@ -348,16 +362,29 @@ FileCompressionResult ModularCompressor::compressSingleFile(const std::string& f
                                                             const std::string& archivePath,
                                                             const CompressionPipeline& pipeline,
                                                             const CompressionOptions& options) {
-    auto algorithm = pluginManager_.getAlgorithm(pipeline.mainAlgorithm);
-    if (!algorithm) {
-        throw std::runtime_error("Algorithm not found: " + pipeline.mainAlgorithm);
-    }
-
     auto data = FileIO::readFile(filepath);
     FileCompressionResult result;
     result.originalPath = filepath;
     result.archivePath = archivePath;
-    result.result = algorithm->compress(buildParams(pipeline, options), data);
+    
+    // 如果设置了跳过压缩（如视频、已压缩文件），直接存储
+    if (options.skipCompression) {
+        result.result.compressedData = data;
+        result.result.uncompressedSize = data.size();
+        result.result.isCompressed = false;
+    } else {
+        auto algorithm = pluginManager_.getAlgorithm(pipeline.mainAlgorithm);
+        if (!algorithm) {
+            throw std::runtime_error("Algorithm not found: " + pipeline.mainAlgorithm);
+        }
+        result.result = algorithm->compress(buildParams(pipeline, options), data);
+        
+        // 如果压缩后反而更大，使用原始数据
+        if (result.result.compressedData.size() >= data.size()) {
+            result.result.compressedData = data;
+            result.result.isCompressed = false;
+        }
+    }
     
     // 计算校验和（对压缩后的数据）
     result.checksum = calculateChecksum(result.result.compressedData);

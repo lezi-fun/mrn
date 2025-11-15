@@ -16,6 +16,7 @@ struct CompressionOptions {
     int compressionLevel = 6;
     bool overwrite = false;
     bool verbose = false;
+    bool skipCompression = false; // 跳过压缩，直接存储（用于已压缩文件）
     size_t batchSize = 4;
     ScanOptions scanOptions;
 };

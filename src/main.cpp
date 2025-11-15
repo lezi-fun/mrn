@@ -98,6 +98,16 @@ int main(int argc, char** argv) {
                 }
                 {
                     std::filesystem::path inputPath(options.inputPaths.front());
+                    
+                    // 如果是auto预设且是单文件，根据文件类型重新检测预设
+                    if (options.preset == "auto" && std::filesystem::is_regular_file(inputPath)) {
+                        CompressionPreset preset = configMgr.detectBestPreset(options.inputPaths.front());
+                        pipeline = preset.pipeline;
+                        compOptions = preset.options;
+                        compOptions.verbose = options.verbose;
+                        compOptions.overwrite = options.overwrite;
+                    }
+                    
                     if (std::filesystem::is_regular_file(inputPath)) {
                         // 单文件压缩
                         compressor.compressFile(options.inputPaths.front(), options.outputPath,
