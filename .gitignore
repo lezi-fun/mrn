@@ -32,6 +32,4 @@ clangd/
 *.app
 # macOS files
 .DS_Store
-tests/
-test
 
