@@ -30,3 +30,8 @@ clangd/
 *.exe
 *.out
 *.app
+# macOS files
+.DS_Store
+tests/
+test
+
