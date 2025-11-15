@@ -1,0 +1,2 @@
+/usr/bin/ar qc libmrn_plugin_stub.a CMakeFiles/mrn_plugin_stub.dir/plugins_stub/plugin_stub.cpp.o
+/usr/bin/ranlib libmrn_plugin_stub.a

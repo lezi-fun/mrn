@@ -1,0 +1,14 @@
+/Users/desktop/mrn/build/CMakeFiles/mrn.dir
+/Users/desktop/mrn/build/CMakeFiles/edit_cache.dir
+/Users/desktop/mrn/build/CMakeFiles/rebuild_cache.dir
+/Users/desktop/mrn/build/CMakeFiles/list_install_components.dir
+/Users/desktop/mrn/build/CMakeFiles/install.dir
+/Users/desktop/mrn/build/CMakeFiles/install/local.dir
+/Users/desktop/mrn/build/CMakeFiles/install/strip.dir
+/Users/desktop/mrn/build/plugins/CMakeFiles/mrn_plugin_stub.dir
+/Users/desktop/mrn/build/plugins/CMakeFiles/edit_cache.dir
+/Users/desktop/mrn/build/plugins/CMakeFiles/rebuild_cache.dir
+/Users/desktop/mrn/build/plugins/CMakeFiles/list_install_components.dir
+/Users/desktop/mrn/build/plugins/CMakeFiles/install.dir
+/Users/desktop/mrn/build/plugins/CMakeFiles/install/local.dir
+/Users/desktop/mrn/build/plugins/CMakeFiles/install/strip.dir
