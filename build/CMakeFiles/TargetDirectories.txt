@@ -1,7 +1,0 @@
-/Users/desktop/mrn/build/CMakeFiles/mrn.dir
-/Users/desktop/mrn/build/CMakeFiles/edit_cache.dir
-/Users/desktop/mrn/build/CMakeFiles/rebuild_cache.dir
-/Users/desktop/mrn/build/CMakeFiles/list_install_components.dir
-/Users/desktop/mrn/build/CMakeFiles/install.dir
-/Users/desktop/mrn/build/CMakeFiles/install/local.dir
-/Users/desktop/mrn/build/CMakeFiles/install/strip.dir
