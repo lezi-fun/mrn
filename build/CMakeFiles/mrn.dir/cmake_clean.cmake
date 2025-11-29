@@ -11,8 +11,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/mrn.dir/src/core/archive_format.cpp.o.d"
   "CMakeFiles/mrn.dir/src/core/compressor.cpp.o"
   "CMakeFiles/mrn.dir/src/core/compressor.cpp.o.d"
-  "CMakeFiles/mrn.dir/src/core/config.cpp.o"
-  "CMakeFiles/mrn.dir/src/core/config.cpp.o.d"
   "CMakeFiles/mrn.dir/src/core/plugin_manager.cpp.o"
   "CMakeFiles/mrn.dir/src/core/plugin_manager.cpp.o.d"
   "CMakeFiles/mrn.dir/src/io/archive_writer.cpp.o"

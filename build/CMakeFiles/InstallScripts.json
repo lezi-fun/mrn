@@ -1,8 +1,7 @@
 {
 	"InstallScripts" : 
 	[
-		"/Users/desktop/mrn/build/cmake_install.cmake",
-		"/Users/desktop/mrn/build/plugins/cmake_install.cmake"
+		"/Users/desktop/mrn/build/cmake_install.cmake"
 	],
 	"Parallel" : false
 }

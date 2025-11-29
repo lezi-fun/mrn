@@ -1,8 +1,8 @@
 #include "core/plugin_manager.h"
-
-#include <filesystem>
-
-#include "utils/logger.h"
+#include "algorithms/move_optimizer.h"
+#include "algorithms/lz77_compressor.h"
+#include "algorithms/huffman_encoder.h"
+#include <stdexcept>
 
 namespace mrn {
 
@@ -11,30 +11,27 @@ PluginManager& PluginManager::getInstance() {
     return instance;
 }
 
-bool PluginManager::registerAlgorithm(const std::string& name,
-                                      std::unique_ptr<ICompressionAlgorithm> algorithm) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (algorithms_.count(name)) {
+bool PluginManager::registerAlgorithm(const std::string& type, 
+                                     std::unique_ptr<ICompressionAlgorithm> algorithm) {
+    if (!algorithm) {
         return false;
     }
-    algorithms_[name] = std::move(algorithm);
-    Logger::instance().log(Logger::Level::Debug, "Registered algorithm: " + name);
-    return true;
+    
+    auto result = algorithms_.emplace(type, std::move(algorithm));
+    return result.second;
 }
 
 bool PluginManager::registerPreprocessor(const std::string& name,
-                                         std::unique_ptr<IPreprocessor> preprocessor) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (preprocessors_.count(name)) {
+                                       std::unique_ptr<IPreprocessor> preprocessor) {
+    if (!preprocessor) {
         return false;
     }
-    preprocessors_[name] = std::move(preprocessor);
-    Logger::instance().log(Logger::Level::Debug, "Registered preprocessor: " + name);
-    return true;
+    
+    auto result = preprocessors_.emplace(name, std::move(preprocessor));
+    return result.second;
 }
 
 std::vector<std::string> PluginManager::getAvailableAlgorithms() const {
-    std::lock_guard<std::mutex> lock(mutex_);
     std::vector<std::string> names;
     for (const auto& pair : algorithms_) {
         names.push_back(pair.first);
@@ -43,7 +40,6 @@ std::vector<std::string> PluginManager::getAvailableAlgorithms() const {
 }
 
 std::vector<std::string> PluginManager::getAvailablePreprocessors() const {
-    std::lock_guard<std::mutex> lock(mutex_);
     std::vector<std::string> names;
     for (const auto& pair : preprocessors_) {
         names.push_back(pair.first);
@@ -52,7 +48,6 @@ std::vector<std::string> PluginManager::getAvailablePreprocessors() const {
 }
 
 ICompressionAlgorithm* PluginManager::getAlgorithm(const std::string& name) {
-    std::lock_guard<std::mutex> lock(mutex_);
     auto it = algorithms_.find(name);
     if (it != algorithms_.end()) {
         return it->second.get();
@@ -61,7 +56,6 @@ ICompressionAlgorithm* PluginManager::getAlgorithm(const std::string& name) {
 }
 
 IPreprocessor* PluginManager::getPreprocessor(const std::string& name) {
-    std::lock_guard<std::mutex> lock(mutex_);
     auto it = preprocessors_.find(name);
     if (it != preprocessors_.end()) {
         return it->second.get();
@@ -70,11 +64,13 @@ IPreprocessor* PluginManager::getPreprocessor(const std::string& name) {
 }
 
 void PluginManager::loadPluginsFromDirectory(const std::string& directory) {
-    namespace fs = std::filesystem;
-    if (!fs::exists(directory)) {
-        return;
-    }
-    Logger::instance().log(Logger::Level::Info, "Scanning plugin directory: " + directory);
+    // TODO: 实现动态库加载
+    // 当前版本只支持内置插件
+}
+
+void PluginManager::initializeBuiltinPlugins() {
+    // 注册内置压缩算法
+    // MoveRun算法将在algorithm_registry.cpp中通过宏自动注册
 }
 
 } // namespace mrn

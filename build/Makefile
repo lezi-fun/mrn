@@ -174,19 +174,6 @@ mrn/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/mrn.dir/build.make CMakeFiles/mrn.dir/build
 .PHONY : mrn/fast
 
-#=============================================================================
-# Target rules for targets named mrn_plugin_stub
-
-# Build rule for target.
-mrn_plugin_stub: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mrn_plugin_stub
-.PHONY : mrn_plugin_stub
-
-# fast build rule for target.
-mrn_plugin_stub/fast:
-	$(MAKE) $(MAKESILENT) -f plugins/CMakeFiles/mrn_plugin_stub.dir/build.make plugins/CMakeFiles/mrn_plugin_stub.dir/build
-.PHONY : mrn_plugin_stub/fast
-
 src/algorithms/algorithm_registry.o: src/algorithms/algorithm_registry.cpp.o
 .PHONY : src/algorithms/algorithm_registry.o
 
@@ -330,30 +317,6 @@ src/core/compressor.s: src/core/compressor.cpp.s
 src/core/compressor.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/mrn.dir/build.make CMakeFiles/mrn.dir/src/core/compressor.cpp.s
 .PHONY : src/core/compressor.cpp.s
-
-src/core/config.o: src/core/config.cpp.o
-.PHONY : src/core/config.o
-
-# target to build an object file
-src/core/config.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mrn.dir/build.make CMakeFiles/mrn.dir/src/core/config.cpp.o
-.PHONY : src/core/config.cpp.o
-
-src/core/config.i: src/core/config.cpp.i
-.PHONY : src/core/config.i
-
-# target to preprocess a source file
-src/core/config.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mrn.dir/build.make CMakeFiles/mrn.dir/src/core/config.cpp.i
-.PHONY : src/core/config.cpp.i
-
-src/core/config.s: src/core/config.cpp.s
-.PHONY : src/core/config.s
-
-# target to generate assembly for a file
-src/core/config.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mrn.dir/build.make CMakeFiles/mrn.dir/src/core/config.cpp.s
-.PHONY : src/core/config.cpp.s
 
 src/core/plugin_manager.o: src/core/plugin_manager.cpp.o
 .PHONY : src/core/plugin_manager.o
@@ -560,7 +523,6 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... mrn"
-	@echo "... mrn_plugin_stub"
 	@echo "... src/algorithms/algorithm_registry.o"
 	@echo "... src/algorithms/algorithm_registry.i"
 	@echo "... src/algorithms/algorithm_registry.s"
@@ -579,9 +541,6 @@ help:
 	@echo "... src/core/compressor.o"
 	@echo "... src/core/compressor.i"
 	@echo "... src/core/compressor.s"
-	@echo "... src/core/config.o"
-	@echo "... src/core/config.i"
-	@echo "... src/core/config.s"
 	@echo "... src/core/plugin_manager.o"
 	@echo "... src/core/plugin_manager.i"
 	@echo "... src/core/plugin_manager.s"

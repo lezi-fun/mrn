@@ -128,24 +128,10 @@ CMakeFiles/mrn.dir/src/core/archive_format.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/mrn.dir/src/core/archive_format.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/desktop/mrn/src/core/archive_format.cpp -o CMakeFiles/mrn.dir/src/core/archive_format.cpp.s
 
-CMakeFiles/mrn.dir/src/core/config.cpp.o: CMakeFiles/mrn.dir/flags.make
-CMakeFiles/mrn.dir/src/core/config.cpp.o: /Users/desktop/mrn/src/core/config.cpp
-CMakeFiles/mrn.dir/src/core/config.cpp.o: CMakeFiles/mrn.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/mrn.dir/src/core/config.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/mrn.dir/src/core/config.cpp.o -MF CMakeFiles/mrn.dir/src/core/config.cpp.o.d -o CMakeFiles/mrn.dir/src/core/config.cpp.o -c /Users/desktop/mrn/src/core/config.cpp
-
-CMakeFiles/mrn.dir/src/core/config.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/mrn.dir/src/core/config.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/desktop/mrn/src/core/config.cpp > CMakeFiles/mrn.dir/src/core/config.cpp.i
-
-CMakeFiles/mrn.dir/src/core/config.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/mrn.dir/src/core/config.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/desktop/mrn/src/core/config.cpp -o CMakeFiles/mrn.dir/src/core/config.cpp.s
-
 CMakeFiles/mrn.dir/src/algorithms/move_optimizer.cpp.o: CMakeFiles/mrn.dir/flags.make
 CMakeFiles/mrn.dir/src/algorithms/move_optimizer.cpp.o: /Users/desktop/mrn/src/algorithms/move_optimizer.cpp
 CMakeFiles/mrn.dir/src/algorithms/move_optimizer.cpp.o: CMakeFiles/mrn.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/mrn.dir/src/algorithms/move_optimizer.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/mrn.dir/src/algorithms/move_optimizer.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/mrn.dir/src/algorithms/move_optimizer.cpp.o -MF CMakeFiles/mrn.dir/src/algorithms/move_optimizer.cpp.o.d -o CMakeFiles/mrn.dir/src/algorithms/move_optimizer.cpp.o -c /Users/desktop/mrn/src/algorithms/move_optimizer.cpp
 
 CMakeFiles/mrn.dir/src/algorithms/move_optimizer.cpp.i: cmake_force
@@ -159,7 +145,7 @@ CMakeFiles/mrn.dir/src/algorithms/move_optimizer.cpp.s: cmake_force
 CMakeFiles/mrn.dir/src/algorithms/lz77_compressor.cpp.o: CMakeFiles/mrn.dir/flags.make
 CMakeFiles/mrn.dir/src/algorithms/lz77_compressor.cpp.o: /Users/desktop/mrn/src/algorithms/lz77_compressor.cpp
 CMakeFiles/mrn.dir/src/algorithms/lz77_compressor.cpp.o: CMakeFiles/mrn.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/mrn.dir/src/algorithms/lz77_compressor.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/mrn.dir/src/algorithms/lz77_compressor.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/mrn.dir/src/algorithms/lz77_compressor.cpp.o -MF CMakeFiles/mrn.dir/src/algorithms/lz77_compressor.cpp.o.d -o CMakeFiles/mrn.dir/src/algorithms/lz77_compressor.cpp.o -c /Users/desktop/mrn/src/algorithms/lz77_compressor.cpp
 
 CMakeFiles/mrn.dir/src/algorithms/lz77_compressor.cpp.i: cmake_force
@@ -173,7 +159,7 @@ CMakeFiles/mrn.dir/src/algorithms/lz77_compressor.cpp.s: cmake_force
 CMakeFiles/mrn.dir/src/algorithms/huffman_encoder.cpp.o: CMakeFiles/mrn.dir/flags.make
 CMakeFiles/mrn.dir/src/algorithms/huffman_encoder.cpp.o: /Users/desktop/mrn/src/algorithms/huffman_encoder.cpp
 CMakeFiles/mrn.dir/src/algorithms/huffman_encoder.cpp.o: CMakeFiles/mrn.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/mrn.dir/src/algorithms/huffman_encoder.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/mrn.dir/src/algorithms/huffman_encoder.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/mrn.dir/src/algorithms/huffman_encoder.cpp.o -MF CMakeFiles/mrn.dir/src/algorithms/huffman_encoder.cpp.o.d -o CMakeFiles/mrn.dir/src/algorithms/huffman_encoder.cpp.o -c /Users/desktop/mrn/src/algorithms/huffman_encoder.cpp
 
 CMakeFiles/mrn.dir/src/algorithms/huffman_encoder.cpp.i: cmake_force
@@ -187,7 +173,7 @@ CMakeFiles/mrn.dir/src/algorithms/huffman_encoder.cpp.s: cmake_force
 CMakeFiles/mrn.dir/src/algorithms/algorithm_registry.cpp.o: CMakeFiles/mrn.dir/flags.make
 CMakeFiles/mrn.dir/src/algorithms/algorithm_registry.cpp.o: /Users/desktop/mrn/src/algorithms/algorithm_registry.cpp
 CMakeFiles/mrn.dir/src/algorithms/algorithm_registry.cpp.o: CMakeFiles/mrn.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/mrn.dir/src/algorithms/algorithm_registry.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/mrn.dir/src/algorithms/algorithm_registry.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/mrn.dir/src/algorithms/algorithm_registry.cpp.o -MF CMakeFiles/mrn.dir/src/algorithms/algorithm_registry.cpp.o.d -o CMakeFiles/mrn.dir/src/algorithms/algorithm_registry.cpp.o -c /Users/desktop/mrn/src/algorithms/algorithm_registry.cpp
 
 CMakeFiles/mrn.dir/src/algorithms/algorithm_registry.cpp.i: cmake_force
@@ -201,7 +187,7 @@ CMakeFiles/mrn.dir/src/algorithms/algorithm_registry.cpp.s: cmake_force
 CMakeFiles/mrn.dir/src/io/file_io.cpp.o: CMakeFiles/mrn.dir/flags.make
 CMakeFiles/mrn.dir/src/io/file_io.cpp.o: /Users/desktop/mrn/src/io/file_io.cpp
 CMakeFiles/mrn.dir/src/io/file_io.cpp.o: CMakeFiles/mrn.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/mrn.dir/src/io/file_io.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/mrn.dir/src/io/file_io.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/mrn.dir/src/io/file_io.cpp.o -MF CMakeFiles/mrn.dir/src/io/file_io.cpp.o.d -o CMakeFiles/mrn.dir/src/io/file_io.cpp.o -c /Users/desktop/mrn/src/io/file_io.cpp
 
 CMakeFiles/mrn.dir/src/io/file_io.cpp.i: cmake_force
@@ -215,7 +201,7 @@ CMakeFiles/mrn.dir/src/io/file_io.cpp.s: cmake_force
 CMakeFiles/mrn.dir/src/io/directory_scanner.cpp.o: CMakeFiles/mrn.dir/flags.make
 CMakeFiles/mrn.dir/src/io/directory_scanner.cpp.o: /Users/desktop/mrn/src/io/directory_scanner.cpp
 CMakeFiles/mrn.dir/src/io/directory_scanner.cpp.o: CMakeFiles/mrn.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/mrn.dir/src/io/directory_scanner.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/mrn.dir/src/io/directory_scanner.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/mrn.dir/src/io/directory_scanner.cpp.o -MF CMakeFiles/mrn.dir/src/io/directory_scanner.cpp.o.d -o CMakeFiles/mrn.dir/src/io/directory_scanner.cpp.o -c /Users/desktop/mrn/src/io/directory_scanner.cpp
 
 CMakeFiles/mrn.dir/src/io/directory_scanner.cpp.i: cmake_force
@@ -229,7 +215,7 @@ CMakeFiles/mrn.dir/src/io/directory_scanner.cpp.s: cmake_force
 CMakeFiles/mrn.dir/src/io/archive_writer.cpp.o: CMakeFiles/mrn.dir/flags.make
 CMakeFiles/mrn.dir/src/io/archive_writer.cpp.o: /Users/desktop/mrn/src/io/archive_writer.cpp
 CMakeFiles/mrn.dir/src/io/archive_writer.cpp.o: CMakeFiles/mrn.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/mrn.dir/src/io/archive_writer.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/mrn.dir/src/io/archive_writer.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/mrn.dir/src/io/archive_writer.cpp.o -MF CMakeFiles/mrn.dir/src/io/archive_writer.cpp.o.d -o CMakeFiles/mrn.dir/src/io/archive_writer.cpp.o -c /Users/desktop/mrn/src/io/archive_writer.cpp
 
 CMakeFiles/mrn.dir/src/io/archive_writer.cpp.i: cmake_force
@@ -243,7 +229,7 @@ CMakeFiles/mrn.dir/src/io/archive_writer.cpp.s: cmake_force
 CMakeFiles/mrn.dir/src/utils/thread_pool.cpp.o: CMakeFiles/mrn.dir/flags.make
 CMakeFiles/mrn.dir/src/utils/thread_pool.cpp.o: /Users/desktop/mrn/src/utils/thread_pool.cpp
 CMakeFiles/mrn.dir/src/utils/thread_pool.cpp.o: CMakeFiles/mrn.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/mrn.dir/src/utils/thread_pool.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/mrn.dir/src/utils/thread_pool.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/mrn.dir/src/utils/thread_pool.cpp.o -MF CMakeFiles/mrn.dir/src/utils/thread_pool.cpp.o.d -o CMakeFiles/mrn.dir/src/utils/thread_pool.cpp.o -c /Users/desktop/mrn/src/utils/thread_pool.cpp
 
 CMakeFiles/mrn.dir/src/utils/thread_pool.cpp.i: cmake_force
@@ -257,7 +243,7 @@ CMakeFiles/mrn.dir/src/utils/thread_pool.cpp.s: cmake_force
 CMakeFiles/mrn.dir/src/utils/progress_tracker.cpp.o: CMakeFiles/mrn.dir/flags.make
 CMakeFiles/mrn.dir/src/utils/progress_tracker.cpp.o: /Users/desktop/mrn/src/utils/progress_tracker.cpp
 CMakeFiles/mrn.dir/src/utils/progress_tracker.cpp.o: CMakeFiles/mrn.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/mrn.dir/src/utils/progress_tracker.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/mrn.dir/src/utils/progress_tracker.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/mrn.dir/src/utils/progress_tracker.cpp.o -MF CMakeFiles/mrn.dir/src/utils/progress_tracker.cpp.o.d -o CMakeFiles/mrn.dir/src/utils/progress_tracker.cpp.o -c /Users/desktop/mrn/src/utils/progress_tracker.cpp
 
 CMakeFiles/mrn.dir/src/utils/progress_tracker.cpp.i: cmake_force
@@ -271,7 +257,7 @@ CMakeFiles/mrn.dir/src/utils/progress_tracker.cpp.s: cmake_force
 CMakeFiles/mrn.dir/src/utils/logger.cpp.o: CMakeFiles/mrn.dir/flags.make
 CMakeFiles/mrn.dir/src/utils/logger.cpp.o: /Users/desktop/mrn/src/utils/logger.cpp
 CMakeFiles/mrn.dir/src/utils/logger.cpp.o: CMakeFiles/mrn.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/mrn.dir/src/utils/logger.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/mrn.dir/src/utils/logger.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/mrn.dir/src/utils/logger.cpp.o -MF CMakeFiles/mrn.dir/src/utils/logger.cpp.o.d -o CMakeFiles/mrn.dir/src/utils/logger.cpp.o -c /Users/desktop/mrn/src/utils/logger.cpp
 
 CMakeFiles/mrn.dir/src/utils/logger.cpp.i: cmake_force
@@ -288,7 +274,6 @@ mrn_OBJECTS = \
 "CMakeFiles/mrn.dir/src/core/compressor.cpp.o" \
 "CMakeFiles/mrn.dir/src/core/plugin_manager.cpp.o" \
 "CMakeFiles/mrn.dir/src/core/archive_format.cpp.o" \
-"CMakeFiles/mrn.dir/src/core/config.cpp.o" \
 "CMakeFiles/mrn.dir/src/algorithms/move_optimizer.cpp.o" \
 "CMakeFiles/mrn.dir/src/algorithms/lz77_compressor.cpp.o" \
 "CMakeFiles/mrn.dir/src/algorithms/huffman_encoder.cpp.o" \
@@ -307,7 +292,6 @@ mrn: CMakeFiles/mrn.dir/src/main.cpp.o
 mrn: CMakeFiles/mrn.dir/src/core/compressor.cpp.o
 mrn: CMakeFiles/mrn.dir/src/core/plugin_manager.cpp.o
 mrn: CMakeFiles/mrn.dir/src/core/archive_format.cpp.o
-mrn: CMakeFiles/mrn.dir/src/core/config.cpp.o
 mrn: CMakeFiles/mrn.dir/src/algorithms/move_optimizer.cpp.o
 mrn: CMakeFiles/mrn.dir/src/algorithms/lz77_compressor.cpp.o
 mrn: CMakeFiles/mrn.dir/src/algorithms/huffman_encoder.cpp.o
@@ -319,9 +303,8 @@ mrn: CMakeFiles/mrn.dir/src/utils/thread_pool.cpp.o
 mrn: CMakeFiles/mrn.dir/src/utils/progress_tracker.cpp.o
 mrn: CMakeFiles/mrn.dir/src/utils/logger.cpp.o
 mrn: CMakeFiles/mrn.dir/build.make
-mrn: /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/libz.tbd
 mrn: CMakeFiles/mrn.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Linking CXX executable mrn"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/desktop/mrn/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Linking CXX executable mrn"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/mrn.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

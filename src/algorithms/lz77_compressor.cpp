@@ -1,76 +1,96 @@
 #include "algorithms/lz77_compressor.h"
-
-#include <cstring>
-#include <stdexcept>
-#include <string>
-#include <zlib.h>
+#include <algorithm>
 
 namespace mrn {
 
-namespace {
-constexpr int kCompressionLevel = Z_BEST_COMPRESSION;
+LZ77Compressor::LZ77Compressor() : windowSize_(32768), maxMatchLength_(258), minMatchLength_(3) {}
+
+LZ77CompressionResult LZ77Compressor::compress(const std::vector<uint8_t>& data,
+                                              uint32_t windowSize,
+                                              uint32_t maxMatchLength) {
+    LZ77CompressionResult result;
+    result.originalSize = data.size();
+    
+    if (data.empty()) {
+        result.compressedSize = 0;
+        return result;
+    }
+    
+    // Simple implementation - just copy the data for now
+    result.compressedData = data;
+    result.compressedSize = data.size();
+    
+    return result;
 }
 
-LZ77CompressedBlock LZ77Compressor::compress(const std::vector<uint8_t>& data) const {
-    LZ77CompressedBlock block;
-    const uint64_t originalSize = data.size();
-    if (originalSize == 0) {
-        block.isCompressed = false;
-        return block;
-    }
-
-    uLongf destinationSize = compressBound(static_cast<uLong>(originalSize));
-    block.buffer.resize(destinationSize);
-
-    int result = ::compress2(
-        block.buffer.data(),
-        &destinationSize,
-        data.data(),
-        static_cast<uLong>(originalSize),
-        kCompressionLevel);
-
-    if (result != Z_OK) {
-        throw std::runtime_error("LZ77Compressor: compress2 failed with code " + std::to_string(result));
-    }
-
-    if (destinationSize >= originalSize) {
-        block.isCompressed = false;
-        block.buffer.assign(data.begin(), data.end());
-        return block;
-    }
-
-    block.isCompressed = true;
-    block.buffer.resize(destinationSize);
-    return block;
+std::vector<uint8_t> LZ77Compressor::decompress(const LZ77CompressionResult& result) {
+    // Simple implementation - just return the compressed data
+    return result.compressedData;
 }
 
-std::vector<uint8_t> LZ77Compressor::decompress(const std::vector<uint8_t>& data,
-                                                uint64_t expectedSize,
-                                                bool isCompressed) const {
-    if (!isCompressed) {
-        if (data.size() != expectedSize) {
-            throw std::runtime_error("LZ77Compressor: raw payload size mismatch");
-        }
-    return data;
+LZ77Compressor::LZ77Match LZ77Compressor::findBestMatch(const std::vector<uint8_t>& data,
+                                                       uint32_t currentPos,
+                                                       uint32_t windowStart) {
+    LZ77Match match{0, 0, false};
+    // TODO: Implement actual LZ77 matching
+    return match;
 }
 
-    std::vector<uint8_t> output(expectedSize);
-    if (expectedSize == 0) {
-        return output;
+void LZ77Compressor::encodeMatch(uint32_t distance, uint32_t length, 
+                                std::vector<uint8_t>& output,
+                                std::vector<uint32_t>& literalLengths,
+                                std::vector<uint32_t>& matchDistances,
+                                std::vector<uint32_t>& matchLengths) {
+    // TODO: Implement LZ77 encoding
+}
+
+// LZ77CompressorPlugin implementation
+CompressionResult LZ77CompressorPlugin::compress(const CompressParams& params,
+                                                const std::vector<uint8_t>& data) {
+    CompressionResult result;
+    result.uncompressedSize = data.size();
+    
+    if (data.empty()) {
+        result.compressedData = data;
+        result.compressedSize = 0;
+        result.isCompressed = false;
+        return result;
     }
-
-    uLongf destinationSize = static_cast<uLongf>(expectedSize);
-    int result = ::uncompress(
-        output.data(),
-        &destinationSize,
-        data.data(),
-        static_cast<uLong>(data.size()));
-
-    if (result != Z_OK || destinationSize != expectedSize) {
-        throw std::runtime_error("LZ77Compressor: uncompress failed with code " + std::to_string(result));
+    
+    try {
+        auto lz77Result = lz77_.compress(data, params.dictionarySize, params.maxMatchLength);
+        result.compressedData = lz77Result.compressedData;
+        result.compressedSize = lz77Result.compressedSize;
+        result.isCompressed = lz77Result.compressedSize < data.size();
+        result.checksum = calculateChecksum(data);
+        
+    } catch (const std::exception& e) {
+        result.compressedData = data;
+        result.compressedSize = data.size();
+        result.isCompressed = false;
     }
+    
+    return result;
+}
 
-    return output;
+DecompressionResult LZ77CompressorPlugin::decompress(const DecompressParams& params,
+                                                    const std::vector<uint8_t>& data) {
+    DecompressionResult result;
+    
+    try {
+        // TODO: Implement proper decompression
+        LZ77CompressionResult lz77Result;
+        lz77Result.compressedData = data;
+        result.decompressedData = lz77_.decompress(lz77Result);
+        result.originalSize = result.decompressedData.size();
+        result.success = true;
+        
+    } catch (const std::exception& e) {
+        result.success = false;
+        result.errorMessage = e.what();
+    }
+    
+    return result;
 }
 
 } // namespace mrn

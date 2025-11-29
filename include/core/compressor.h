@@ -1,80 +1,98 @@
 #pragma once
 
-#include <future>
-#include <map>
-#include <memory>
+#include "plugin_interface.h"
+#include "archive_format.h"
+#include "plugin_manager.h"
 #include <string>
-#include <vector>
-
-#include "core/plugin_manager.h"
-#include "io/directory_scanner.h"
-#include "utils/thread_pool.h"
+#include <memory>
 
 namespace mrn {
 
-struct CompressionOptions {
-    int compressionLevel = 6;
-    bool overwrite = false;
-    bool verbose = false;
-    bool skipCompression = false; // 跳过压缩，直接存储（用于已压缩文件）
-    size_t batchSize = 4;
-    ScanOptions scanOptions;
-};
-
-struct CompressionPipeline {
-    std::vector<std::string> preprocessors;
-    std::string mainAlgorithm = "moverun";
-    std::map<std::string, AlgorithmConfig> algorithmConfigs;
-};
-
+// 文件压缩结果
 struct FileCompressionResult {
-    std::string originalPath;
-    std::string archivePath;
-    CompressionResult result;
-    uint16_t filePermissions = 0;
-    uint64_t modifiedTime = 0;
-    uint32_t checksum = 0;
+    std::string filename;
+    ::mrn::CompressionResult result;
+    bool success = false;
+    std::string errorMessage;
 };
 
-class DirectoryScanner;
-class ArchiveWriter;
+// 总体压缩结果
+struct OverallCompressionResult {
+    bool success = false;
+    uint64_t totalUncompressedSize = 0;
+    uint64_t totalCompressedSize = 0;
+    uint32_t fileCount = 0;
+    std::string errorMessage;
+    std::vector<FileCompressionResult> fileResults;
+};
+
+// 总体解压结果
+struct OverallDecompressionResult {
+    bool success = false;
+    uint32_t fileCount = 0;
+    std::string errorMessage;
+};
 
 class ModularCompressor {
 public:
-    explicit ModularCompressor(size_t threadCount = 0);
-
-    CompressionResult compressFile(const std::string& inputFile,
-                                    const std::string& outputFile,
-                                    const CompressionPipeline& pipeline,
-                                    const CompressionOptions& options);
-
-    CompressionResult compressDirectory(const std::string& inputDir,
-                                         const std::string& outputFile,
-                                         const CompressionPipeline& pipeline,
-                                         const CompressionOptions& options);
-
-    DecompressionResult decompress(const std::string& inputFile,
-                                   const std::string& outputPath);
-
-    // 列出归档内容
-    void listArchive(const std::string& inputFile);
-
-    // 测试归档完整性
-    bool testArchive(const std::string& inputFile);
-
-    void setDefaultPipeline(const std::string& preset);
-    CompressionPipeline createCustomPipeline(const std::vector<std::string>& steps);
-
-private:
-    PluginManager& pluginManager_;
-    std::unique_ptr<ThreadPool> threadPool_;
-    std::unique_ptr<DirectoryScanner> directoryScanner_;
-    CompressionPipeline defaultPipeline_;
-
-    FileCompressionResult compressSingleFile(const std::string& filepath,
-                                             const std::string& archivePath,
+    ModularCompressor();
+    ~ModularCompressor();
+    
+    // 文件夹压缩
+    OverallCompressionResult compressDirectory(const std::string& inputDir,
+                                             const std::string& outputFile,
                                              const CompressionPipeline& pipeline,
                                              const CompressionOptions& options);
+    
+    // 文件压缩
+    OverallCompressionResult compressFile(const std::string& inputFile,
+                                        const std::string& outputFile, 
+                                        const CompressionPipeline& pipeline,
+                                        const CompressionOptions& options);
+    
+    // 解压
+    OverallDecompressionResult decompress(const std::string& inputFile,
+                                        const std::string& outputPath);
+    
+    // 流水线构建
+    void setDefaultPipeline(const std::string& preset); // "text", "binary", "maximum"
+    CompressionPipeline createCustomPipeline(const std::vector<std::string>& steps);
+    
+    // 配置预设
+    struct CompressionPreset {
+        std::string name;
+        CompressionPipeline pipeline;
+        CompressionOptions options;
+    };
+    
+    static CompressionPreset createTextPreset();
+    static CompressionPreset createBinaryPreset(); 
+    static CompressionPreset createMaximumPreset();
+    static CompressionPreset createFastPreset();
+    static CompressionPreset createStorePreset();
+    
+    // 文件类型检测
+    static std::string detectFileType(const std::string& filename);
+    static CompressionPreset detectBestPreset(const std::string& filename);
+    
+private:
+    PluginManager& pluginManager_;
+    std::unique_ptr<class ThreadPool> threadPool_;
+    CompressionPipeline defaultPipeline_;
+    
+    // 内部方法
+    FileCompressionResult compressSingleFile(const std::string& filepath,
+                                            const CompressionPipeline& pipeline,
+                                            const CompressionOptions& options);
+    
+    void compressDirectoryParallel(const std::string& inputDir,
+                                  const std::string& outputFile,
+                                  const CompressionPipeline& pipeline,
+                                  const CompressionOptions& options);
+    
+    std::vector<std::vector<std::string>> groupFilesByType(const std::vector<std::string>& files);
+    CompressionPipeline selectPipelineForFileGroup(const std::string& fileType, 
+                                                  const CompressionPipeline& basePipeline);
 };
 
 } // namespace mrn

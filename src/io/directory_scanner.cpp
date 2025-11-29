@@ -1,104 +1,120 @@
 #include "io/directory_scanner.h"
-
+#include "io/file_io.h"
 #include <filesystem>
-
-namespace fs = std::filesystem;
+#include <regex>
 
 namespace mrn {
 
-namespace {
-bool matchFilters(const std::vector<std::regex>& filters, const std::string& value) {
-    if (filters.empty()) {
-        return true;
-    }
-    for (const auto& filter : filters) {
-        if (std::regex_match(value, filter)) {
-            return true;
-        }
-    }
-    return false;
-}
-}
+DirectoryScanner::DirectoryScanner() : maxFileSize_(0) {}
 
-std::vector<DirectoryScanner::FileInfo> DirectoryScanner::scanDirectory(
-    const std::string& rootPath, const ScanOptions& options) {
+std::vector<DirectoryScanner::FileInfo> DirectoryScanner::scanDirectory(const std::string& rootPath,
+                                                                       const ScanOptions& options) {
     std::vector<FileInfo> results;
+    stats_ = ScanStats();
+    
+    if (!FileIO::isDirectory(rootPath)) {
+        return results;
+    }
+    
     scanRecursive(rootPath, "", results, options);
     return results;
 }
 
 void DirectoryScanner::addIncludeFilter(const std::string& pattern) {
-    includeFilters_.emplace_back(pattern);
+    try {
+        includeFilters_.emplace_back(pattern, std::regex::icase);
+    } catch (const std::regex_error&) {
+        // Ignore invalid regex patterns
+    }
 }
 
 void DirectoryScanner::addExcludeFilter(const std::string& pattern) {
-    excludeFilters_.emplace_back(pattern);
+    try {
+        excludeFilters_.emplace_back(pattern, std::regex::icase);
+    } catch (const std::regex_error&) {
+        // Ignore invalid regex patterns
+    }
 }
 
 void DirectoryScanner::setMaxFileSize(uint64_t maxSize) {
     maxFileSize_ = maxSize;
 }
 
-void DirectoryScanner::scanRecursive(const std::string& rootPath,
-                                     const std::string& currentPath,
-                                     std::vector<FileInfo>& results,
-                                     const ScanOptions& options) {
-    const auto absolutePath = currentPath.empty() ? fs::path(rootPath)
-                                                  : fs::path(rootPath) / currentPath;
-
-    if (!fs::exists(absolutePath)) {
-        return;
-    }
-
-    for (const auto& entry : fs::directory_iterator(absolutePath)) {
-        const auto filename = entry.path().filename().string();
-        if (!options.includeHidden && !filename.empty() && filename[0] == '.') {
-            continue;
+void DirectoryScanner::scanRecursive(const std::string& currentPath, 
+                                    const std::string& relativePath,
+                                    std::vector<FileInfo>& results,
+                                    const ScanOptions& options) {
+    try {
+        for (const auto& entry : std::filesystem::directory_iterator(currentPath)) {
+            if (!options.includeHidden && isHiddenFile(entry.path().filename().string())) {
+                continue;
+            }
+            
+            std::string entryRelativePath = relativePath.empty() 
+                ? entry.path().filename().string()
+                : FileIO::joinPaths(relativePath, entry.path().filename().string());
+            
+            if (entry.is_directory()) {
+                stats_.totalDirectories++;
+                if (options.recursive) {
+                    scanRecursive(entry.path().string(), entryRelativePath, results, options);
+                }
+            } else if (entry.is_regular_file()) {
+                stats_.totalFiles++;
+                uint64_t fileSize = entry.file_size();
+                stats_.totalSize += fileSize;
+                
+                if (shouldIncludeFile(entry.path().filename().string(), entryRelativePath, fileSize)) {
+                    FileInfo info;
+                    info.path = entry.path().string();
+                    info.relativePath = entryRelativePath;
+                    info.size = fileSize;
+                    info.modifiedTime = FileIO::getFileModifiedTime(entry.path().string());
+                    info.permissions = FileIO::getFilePermissions(entry.path().string());
+                    info.isDirectory = false;
+                    
+                    results.push_back(info);
+                } else {
+                    stats_.excludedFiles++;
+                }
+            }
         }
-        if (!options.followSymlinks && fs::is_symlink(entry.symlink_status())) {
-            continue;
-        }
-
-        FileInfo info;
-        info.path = entry.path().string();
-        if (currentPath.empty()) {
-            info.relativePath = filename;
-        } else {
-            info.relativePath = (fs::path(currentPath) / entry.path().filename()).string();
-        }
-        info.isDirectory = entry.is_directory();
-        if (!info.isDirectory) {
-            info.size = entry.file_size();
-        }
-        info.modifiedTime = entry.last_write_time().time_since_epoch().count();
-
-        if (!shouldInclude(info.relativePath, info.size)) {
-            continue;
-        }
-
-        results.push_back(info);
-
-        if (info.isDirectory) {
-            scanRecursive(rootPath, info.relativePath, results, options);
-        }
+    } catch (const std::filesystem::filesystem_error&) {
+        // Ignore permission errors and other filesystem issues
     }
 }
 
-bool DirectoryScanner::shouldInclude(const std::string& relativePath, uint64_t size) const {
-    if (maxFileSize_ != 0 && size > maxFileSize_) {
+bool DirectoryScanner::shouldIncludeFile(const std::string& filename, 
+                                        const std::string& relativePath,
+                                        uint64_t fileSize) const {
+    if (maxFileSize_ > 0 && fileSize > maxFileSize_) {
         return false;
     }
-
-    if (!matchFilters(includeFilters_, relativePath)) {
+    
+    // Check exclude filters first
+    if (!excludeFilters_.empty() && matchesPattern(relativePath, excludeFilters_)) {
         return false;
     }
+    
+    // Check include filters
+    if (!includeFilters_.empty() && !matchesPattern(relativePath, includeFilters_)) {
+        return false;
+    }
+    
+    return true;
+}
 
-    for (const auto& filter : excludeFilters_) {
-        if (std::regex_match(relativePath, filter)) {
-            return false;
+bool DirectoryScanner::isHiddenFile(const std::string& filename) const {
+    return !filename.empty() && filename[0] == '.';
+}
+
+bool DirectoryScanner::matchesPattern(const std::string& text, const std::vector<std::regex>& patterns) const {
+    for (const auto& pattern : patterns) {
+        if (std::regex_search(text, pattern)) {
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
 } // namespace mrn

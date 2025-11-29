@@ -14,7 +14,6 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/desktop/mrn/src/algorithms/move_optimizer.cpp" "CMakeFiles/mrn.dir/src/algorithms/move_optimizer.cpp.o" "gcc" "CMakeFiles/mrn.dir/src/algorithms/move_optimizer.cpp.o.d"
   "/Users/desktop/mrn/src/core/archive_format.cpp" "CMakeFiles/mrn.dir/src/core/archive_format.cpp.o" "gcc" "CMakeFiles/mrn.dir/src/core/archive_format.cpp.o.d"
   "/Users/desktop/mrn/src/core/compressor.cpp" "CMakeFiles/mrn.dir/src/core/compressor.cpp.o" "gcc" "CMakeFiles/mrn.dir/src/core/compressor.cpp.o.d"
-  "/Users/desktop/mrn/src/core/config.cpp" "CMakeFiles/mrn.dir/src/core/config.cpp.o" "gcc" "CMakeFiles/mrn.dir/src/core/config.cpp.o.d"
   "/Users/desktop/mrn/src/core/plugin_manager.cpp" "CMakeFiles/mrn.dir/src/core/plugin_manager.cpp.o" "gcc" "CMakeFiles/mrn.dir/src/core/plugin_manager.cpp.o.d"
   "/Users/desktop/mrn/src/io/archive_writer.cpp" "CMakeFiles/mrn.dir/src/io/archive_writer.cpp.o" "gcc" "CMakeFiles/mrn.dir/src/io/archive_writer.cpp.o.d"
   "/Users/desktop/mrn/src/io/directory_scanner.cpp" "CMakeFiles/mrn.dir/src/io/directory_scanner.cpp.o" "gcc" "CMakeFiles/mrn.dir/src/io/directory_scanner.cpp.o.d"
