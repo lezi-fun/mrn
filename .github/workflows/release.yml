@@ -235,7 +235,6 @@ jobs:
           - **ARM64**: `mrn-linux-aarch64-v${{ steps.version.outputs.version }}`
           
           ### macOS
-          - **Intel x86_64**: `mrn-macos-x86_64-v${{ steps.version.outputs.version }}`
           - **Apple Silicon (ARM64)**: `mrn-macos-arm64-v${{ steps.version.outputs.version }}`
           
           ## 🔒 校验和
