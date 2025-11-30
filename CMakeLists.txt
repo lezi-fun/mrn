@@ -10,6 +10,11 @@ option(MRN_BUILD_BENCHMARKS "Build benchmarks" OFF)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# 设置输出目录，确保可执行文件在明确的位置
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
 # 检测目标架构
 if(CMAKE_SYSTEM_PROCESSOR)
     message(STATUS "Target architecture: ${CMAKE_SYSTEM_PROCESSOR}")
@@ -69,6 +74,12 @@ add_executable(mrn
     src/utils/logger.cpp
 )
 
+# 设置可执行文件输出名称，确保一致
+set_target_properties(mrn PROPERTIES
+    OUTPUT_NAME "mrn"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+
 # 包含目录
 target_include_directories(mrn PRIVATE 
     include
@@ -95,3 +106,8 @@ endif()
 # 安装
 install(TARGETS mrn DESTINATION bin)
 install(DIRECTORY include/ DESTINATION include/mrn)
+
+# 在构建后显示输出位置信息
+add_custom_command(TARGET mrn POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "MRN executable built at: $<TARGET_FILE:mrn>"
+)
