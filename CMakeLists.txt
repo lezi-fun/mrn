@@ -16,6 +16,13 @@ else()
     add_compile_options(-O0 -g -DDEBUG)
 endif()
 
+# 配置版本头文件
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/core/version.h.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/include/core/version.h"
+    @ONLY
+)
+
 # 主可执行文件
 add_executable(mrn
     src/main.cpp
@@ -38,6 +45,7 @@ add_executable(mrn
 target_include_directories(mrn PRIVATE 
     include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_BINARY_DIR}/include
 )
 
 # 依赖
@@ -49,6 +57,39 @@ if(MRN_BUILD_PLUGINS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/plugins/CMakeLists.
     add_subdirectory(plugins)
 endif()
 
-# 安装
-install(TARGETS mrn DESTINATION bin)
-install(DIRECTORY include/ DESTINATION include/mrn)
+# 测试
+if(MRN_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
+# 安装配置
+install(TARGETS mrn
+    RUNTIME DESTINATION bin
+    BUNDLE DESTINATION bin
+)
+
+install(DIRECTORY include/ DESTINATION include/mrn
+    FILES_MATCHING PATTERN "*.h"
+)
+
+# 打包配置 (用于创建分发包)
+set(CPACK_PACKAGE_NAME "mrn-compressor")
+set(CPACK_PACKAGE_VENDOR "MRN Team")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Modular Compression Tool")
+set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "MRN")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+
+if(WIN32)
+    set(CPACK_GENERATOR "ZIP;NSIS")
+elseif(APPLE)
+    set(CPACK_GENERATOR "ZIP;DragNDrop")
+else()
+    set(CPACK_GENERATOR "ZIP;TGZ")
+endif()
+
+include(CPack)
