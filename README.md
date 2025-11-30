@@ -3,7 +3,9 @@
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![C++](https://img.shields.io/badge/C++-17-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-green.svg)
+
 **本README.md由[DeepSeek](https://www.deepseek.com)生成**
+
 **中文** | [English](#english-version)
 
 MRN (模块化游程N压缩器) 是一个用 C++ 编写的现代模块化压缩工具，结合了多种压缩算法、智能文件类型检测和基于插件的架构。
