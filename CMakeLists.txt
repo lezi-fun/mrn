@@ -9,11 +9,25 @@ option(MRN_BUILD_BENCHMARKS "Build benchmarks" OFF)
 # 编译器设置
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    add_compile_options(-O3 -DNDEBUG)
+# 平台特定的编译选项
+if(MSVC)
+    # Windows/MSVC 设置
+    add_compile_options(/W4 /permissive-)
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        add_compile_options(/O2 /Ob2 /DNDEBUG)
+    else()
+        add_compile_options(/Od /Zi /DDEBUG)
+    endif()
 else()
-    add_compile_options(-O0 -g -DDEBUG)
+    # GCC/Clang 设置
+    add_compile_options(-Wall -Wextra -Wpedantic)
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        add_compile_options(-O3 -DNDEBUG)
+    else()
+        add_compile_options(-O0 -g -DDEBUG)
+    endif()
 endif()
 
 # 配置版本头文件
@@ -22,6 +36,9 @@ configure_file(
     "${CMAKE_CURRENT_BINARY_DIR}/include/core/version.h"
     @ONLY
 )
+
+# 创建版本头文件目录
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/core")
 
 # 主可执行文件
 add_executable(mrn
@@ -52,13 +69,18 @@ target_include_directories(mrn PRIVATE
 find_package(Threads REQUIRED)
 target_link_libraries(mrn PRIVATE Threads::Threads)
 
+# Windows 特定设置
+if(WIN32)
+    target_link_libraries(mrn PRIVATE ws2_32)  # Winsock library if needed
+endif()
+
 # 插件系统
 if(MRN_BUILD_PLUGINS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/plugins/CMakeLists.txt")
     add_subdirectory(plugins)
 endif()
 
 # 测试
-if(MRN_BUILD_TESTS)
+if(MRN_BUILD_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")
     enable_testing()
     add_subdirectory(tests)
 endif()
@@ -73,7 +95,7 @@ install(DIRECTORY include/ DESTINATION include/mrn
     FILES_MATCHING PATTERN "*.h"
 )
 
-# 打包配置 (用于创建分发包)
+# 打包配置
 set(CPACK_PACKAGE_NAME "mrn-compressor")
 set(CPACK_PACKAGE_VENDOR "MRN Team")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Modular Compression Tool")
@@ -85,9 +107,9 @@ set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 
 if(WIN32)
-    set(CPACK_GENERATOR "ZIP;NSIS")
+    set(CPACK_GENERATOR "ZIP")
 elseif(APPLE)
-    set(CPACK_GENERATOR "ZIP;DragNDrop")
+    set(CPACK_GENERATOR "ZIP")
 else()
     set(CPACK_GENERATOR "ZIP;TGZ")
 endif()
