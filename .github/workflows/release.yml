@@ -7,9 +7,9 @@ on:
   workflow_dispatch:  # 允许手动触发
     inputs:
       version:
-        description: '版本号 (例如: 2.0.0)'
+        description: '版本号 (例如: 2.1.0)'
         required: true
-        default: '2.0.0'
+        default: '2.1.0'
 
 env:
   BUILD_TYPE: Release
@@ -25,12 +25,15 @@ jobs:
           - os: ubuntu-22.04
             artifact_name: mrn-linux-x64
             build_dir: build_linux
+            shell: bash
           - os: macos-12
             artifact_name: mrn-macos-x64
             build_dir: build_macos
+            shell: bash
           - os: windows-2022
             artifact_name: mrn-windows-x64
             build_dir: build_windows
+            shell: cmd
 
     steps:
     - name: Checkout repository
@@ -42,6 +45,7 @@ jobs:
       run: |
         echo "BUILD_DIR=${{ matrix.build_dir }}" >> $GITHUB_ENV
         echo "ARTIFACT_NAME=${{ matrix.artifact_name }}" >> $GITHUB_ENV
+      shell: bash
 
     - name: Install Linux dependencies
       if: matrix.os == 'ubuntu-22.04'
@@ -61,53 +65,90 @@ jobs:
         choco install cmake ninja -y
 
     - name: Configure CMake
+      shell: ${{ matrix.shell }}
       run: |
-        cmake -B ${{ env.BUILD_DIR }} \
-          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+        @echo off
+        cmake -B %BUILD_DIR% ^
+          -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
+          -DMRN_BUILD_TESTS=ON ^
+          -DMRN_BUILD_PLUGINS=ON
+      if: matrix.os == 'windows-2022'
+
+    - name: Configure CMake (Linux/macOS)
+      shell: bash
+      run: |
+        cmake -B $BUILD_DIR \
+          -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
           -DMRN_BUILD_TESTS=ON \
           -DMRN_BUILD_PLUGINS=ON
+      if: matrix.os != 'windows-2022'
 
-    - name: Build project
+    - name: Build project (Windows)
+      if: matrix.os == 'windows-2022'
+      shell: cmd
       run: |
-        cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} --parallel
+        cmake --build %BUILD_DIR% --config %BUILD_TYPE% --parallel
 
-    - name: Run tests
+    - name: Build project (Linux/macOS)
+      if: matrix.os != 'windows-2022'
+      shell: bash
       run: |
-        cd ${{ env.BUILD_DIR }}
-        ctest --output-on-failure -C ${{ env.BUILD_TYPE }}
+        cmake --build $BUILD_DIR --config $BUILD_TYPE --parallel
+
+    - name: Run tests (Windows)
+      if: matrix.os == 'windows-2022'
+      shell: cmd
+      run: |
+        cd %BUILD_DIR%
+        ctest --output-on-failure -C %BUILD_TYPE%
+
+    - name: Run tests (Linux/macOS)
+      if: matrix.os != 'windows-2022'
+      shell: bash
+      run: |
+        cd $BUILD_DIR
+        ctest --output-on-failure -C $BUILD_TYPE
 
     - name: Collect binary (Linux/macOS)
       if: matrix.os != 'windows-2022'
+      shell: bash
       run: |
         # 查找可执行文件
-        find ${{ env.BUILD_DIR }} -name "mrn" -type f -executable | head -1 > binary_path.txt
+        find $BUILD_DIR -name "mrn" -type f -executable | head -1 > binary_path.txt
         if [ ! -s binary_path.txt ]; then
           echo "Error: Binary not found!"
-          find ${{ env.BUILD_DIR }} -type f -executable
+          find $BUILD_DIR -type f -executable
           exit 1
         fi
         BINARY_PATH=$(cat binary_path.txt)
-        cp "$BINARY_PATH" ${{ env.ARTIFACT_NAME }}
-        chmod +x ${{ env.ARTIFACT_NAME }}
+        cp "$BINARY_PATH" $ARTIFACT_NAME
+        chmod +x $ARTIFACT_NAME
+        # 验证文件
+        file $ARTIFACT_NAME
+        ./$ARTIFACT_NAME --version || echo "Version check failed but continuing..."
 
     - name: Collect binary (Windows)
       if: matrix.os == 'windows-2022'
+      shell: cmd
       run: |
-        # 查找可执行文件
-        dir "${{ env.BUILD_DIR }}\${{ env.BUILD_TYPE }}" /s /b | findstr "mrn.exe" > binary_path.txt
+        @echo off
+        dir "%BUILD_DIR%" /s /b | findstr "mrn.exe" > binary_path.txt
         if not exist binary_path.txt (
-          echo "Error: Binary not found!"
-          exit 1
+          echo Error: Binary not found!
+          dir "%BUILD_DIR%" /s /b
+          exit /b 1
         )
         set /p BINARY_PATH=<binary_path.txt
-        copy "%BINARY_PATH%" ${{ env.ARTIFACT_NAME }}.exe
+        copy "%BINARY_PATH%" "%ARTIFACT_NAME%.exe"
+        echo Binary collected: %ARTIFACT_NAME%.exe
+        dir "%ARTIFACT_NAME%.exe"
 
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.ARTIFACT_NAME }}
+        name: ${{ matrix.artifact_name }}
         path: |
-          ${{ env.ARTIFACT_NAME }}*
+          ${{ matrix.artifact_name }}*
         retention-days: 7
 
   create-release:
