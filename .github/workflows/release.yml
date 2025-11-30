@@ -1,0 +1,105 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # 匹配 v 开头的标签，如 v1.0.0
+  workflow_dispatch:  # 允许手动触发
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: mrn-linux
+            cmake_generator: Unix Makefiles
+          - os: macos-latest
+            artifact_name: mrn-macos
+            cmake_generator: Unix Makefiles
+          - os: windows-latest
+            artifact_name: mrn-windows.exe
+            cmake_generator: Visual Studio 17 2022
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake ninja-build
+
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew update
+        brew install cmake ninja
+
+    - name: Install dependencies (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        choco install cmake ninja -y
+
+    - name: Configure CMake
+      run: |
+        cmake -B ${{github.workspace}}/build \
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+          -G "${{ matrix.cmake_generator }}"
+
+    - name: Build
+      run: |
+        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Test (Linux/macOS)
+      if: matrix.os != 'windows-latest'
+      working-directory: ${{github.workspace}}/build
+      run: |
+        make test
+
+    - name: Test (Windows)
+      if: matrix.os == 'windows-latest'
+      working-directory: ${{github.workspace}}/build
+      run: |
+        ctest -C ${{env.BUILD_TYPE}}
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: ${{github.workspace}}/build/mrn*
+        if-no-files-found: error
+
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Download all build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ${{github.workspace}}/artifacts
+
+    - name: List artifacts
+      run: ls -la ${{github.workspace}}/artifacts/
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ${{github.workspace}}/artifacts/**/*
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
