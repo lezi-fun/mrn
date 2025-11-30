@@ -86,9 +86,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - arch: x86_64
-            runner: macos-12
-            artifact_name: mrn-macos-x86_64
           - arch: arm64
             runner: macos-latest
             artifact_name: mrn-macos-arm64
@@ -270,7 +267,6 @@ jobs:
           |------|------|------|
           | Linux | x86_64 (Intel/AMD) | ✅ 支持 |
           | Linux | AArch64 (ARM64) | ✅ 支持 |
-          | macOS | x86_64 (Intel) | ✅ 支持 |
           | macOS | ARM64 (Apple Silicon) | ✅ 支持 |
           
           > 💡 **注意**: Windows 版本暂未提供，用户可在 Windows 上使用 WSL 运行 Linux 版本
