@@ -1,105 +1,196 @@
-name: Build and Release
+name: Build and Release MRN
 
 on:
   push:
     tags:
-      - 'v*'  # 匹配 v 开头的标签，如 v1.0.0
+      - 'v*'  # 匹配 v 开头的标签，如 v2.0.0, v2.1.0
   workflow_dispatch:  # 允许手动触发
+    inputs:
+      version:
+        description: '版本号 (例如: 2.0.0)'
+        required: true
+        default: '2.0.0'
 
 env:
   BUILD_TYPE: Release
+  PROJECT_NAME: mrn_compressor
 
 jobs:
-  build:
-    name: Build for ${{ matrix.os }}
+  build-cross-platform:
+    name: Build MRN - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
-            artifact_name: mrn-linux
-            cmake_generator: Unix Makefiles
-          - os: macos-latest
-            artifact_name: mrn-macos
-            cmake_generator: Unix Makefiles
-          - os: windows-latest
-            artifact_name: mrn-windows.exe
-            cmake_generator: Visual Studio 17 2022
+          - os: ubuntu-22.04
+            artifact_name: mrn-linux-x64
+            build_dir: build_linux
+          - os: macos-12
+            artifact_name: mrn-macos-x64
+            build_dir: build_macos
+          - os: windows-2022
+            artifact_name: mrn-windows-x64
+            build_dir: build_windows
 
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v4
       with:
         submodules: recursive
 
-    - name: Install dependencies (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
+    - name: Setup environment
+      run: |
+        echo "BUILD_DIR=${{ matrix.build_dir }}" >> $GITHUB_ENV
+        echo "ARTIFACT_NAME=${{ matrix.artifact_name }}" >> $GITHUB_ENV
+
+    - name: Install Linux dependencies
+      if: matrix.os == 'ubuntu-22.04'
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential cmake ninja-build
 
-    - name: Install dependencies (macOS)
-      if: matrix.os == 'macos-latest'
+    - name: Install macOS dependencies
+      if: matrix.os == 'macos-12'
       run: |
         brew update
         brew install cmake ninja
 
-    - name: Install dependencies (Windows)
-      if: matrix.os == 'windows-latest'
+    - name: Install Windows dependencies
+      if: matrix.os == 'windows-2022'
       run: |
         choco install cmake ninja -y
 
     - name: Configure CMake
       run: |
-        cmake -B ${{github.workspace}}/build \
-          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
-          -G "${{ matrix.cmake_generator }}"
+        cmake -B ${{ env.BUILD_DIR }} \
+          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+          -DMRN_BUILD_TESTS=ON \
+          -DMRN_BUILD_PLUGINS=ON
 
-    - name: Build
+    - name: Build project
       run: |
-        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} --parallel
 
-    - name: Test (Linux/macOS)
-      if: matrix.os != 'windows-latest'
-      working-directory: ${{github.workspace}}/build
+    - name: Run tests
       run: |
-        make test
+        cd ${{ env.BUILD_DIR }}
+        ctest --output-on-failure -C ${{ env.BUILD_TYPE }}
 
-    - name: Test (Windows)
-      if: matrix.os == 'windows-latest'
-      working-directory: ${{github.workspace}}/build
+    - name: Collect binary (Linux/macOS)
+      if: matrix.os != 'windows-2022'
       run: |
-        ctest -C ${{env.BUILD_TYPE}}
+        # 查找可执行文件
+        find ${{ env.BUILD_DIR }} -name "mrn" -type f -executable | head -1 > binary_path.txt
+        if [ ! -s binary_path.txt ]; then
+          echo "Error: Binary not found!"
+          find ${{ env.BUILD_DIR }} -type f -executable
+          exit 1
+        fi
+        BINARY_PATH=$(cat binary_path.txt)
+        cp "$BINARY_PATH" ${{ env.ARTIFACT_NAME }}
+        chmod +x ${{ env.ARTIFACT_NAME }}
+
+    - name: Collect binary (Windows)
+      if: matrix.os == 'windows-2022'
+      run: |
+        # 查找可执行文件
+        dir "${{ env.BUILD_DIR }}\${{ env.BUILD_TYPE }}" /s /b | findstr "mrn.exe" > binary_path.txt
+        if not exist binary_path.txt (
+          echo "Error: Binary not found!"
+          exit 1
+        )
+        set /p BINARY_PATH=<binary_path.txt
+        copy "%BINARY_PATH%" ${{ env.ARTIFACT_NAME }}.exe
 
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.artifact_name }}
-        path: ${{github.workspace}}/build/mrn*
-        if-no-files-found: error
+        name: ${{ env.ARTIFACT_NAME }}
+        path: |
+          ${{ env.ARTIFACT_NAME }}*
+        retention-days: 7
 
   create-release:
-    name: Create Release
+    name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/')
+    needs: build-cross-platform
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     
     steps:
-    - name: Download all build artifacts
+    - name: Download all artifacts
       uses: actions/download-artifact@v4
       with:
-        path: ${{github.workspace}}/artifacts
+        path: ./artifacts
 
-    - name: List artifacts
-      run: ls -la ${{github.workspace}}/artifacts/
+    - name: Determine version
+      id: version
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION="${GITHUB_REF#refs/tags/v}"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Building release for version: $VERSION"
+
+    - name: Prepare release assets
+      run: |
+        mkdir -p release_assets
+        # 重命名文件以包含版本号
+        for artifact_dir in artifacts/*/; do
+          if [ -d "$artifact_dir" ]; then
+            artifact_name=$(basename "$artifact_dir")
+            for file in "$artifact_dir"/*; do
+              if [ -f "$file" ]; then
+                filename=$(basename "$file")
+                extension="${filename##*.}"
+                name="${filename%.*}"
+                new_name="${name}-v${{ steps.version.outputs.version }}.${extension}"
+                cp "$file" "release_assets/$new_name"
+                echo "Added: $new_name"
+              fi
+            done
+          fi
+        done
+        
+        # 创建校验和文件
+        cd release_assets
+        sha256sum * > checksums.txt
+        echo "Release assets:"
+        ls -la
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
+        tag_name: v${{ steps.version.outputs.version }}
+        name: MRN Compressor v${{ steps.version.outputs.version }}
+        body: |
+          # MRN Compressor v${{ steps.version.outputs.version }}
+          
+          ## 📦 下载
+          选择适合您操作系统的版本下载：
+          
+          - **Windows**: `mrn-windows-x64-v${{ steps.version.outputs.version }}.exe`
+          - **macOS**: `mrn-macos-x64-v${{ steps.version.outputs.version }}`
+          - **Linux**: `mrn-linux-x64-v${{ steps.version.outputs.version }}`
+          
+          ## 🔒 校验和
+          下载后请验证文件完整性：
+          ```bash
+          sha256sum -c checksums.txt
+          ```
+          
+          ## 🚀 特性
+          - 多算法压缩支持 (MoveRun, LZ77, Huffman)
+          - 智能文件类型检测
+          - 跨平台支持
+          - 多线程处理
+          
+          📖 [查看完整文档](https://github.com/${{ github.repository }}#readme)
         files: |
-          ${{github.workspace}}/artifacts/**/*
-        generate_release_notes: true
+          release_assets/*
         draft: false
         prerelease: false
+        generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
