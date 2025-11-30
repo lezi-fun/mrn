@@ -1,11 +1,21 @@
 #pragma once
 
-#define MRN_VERSION_MAJOR @MRN_VERSION_MAJOR@
-#define MRN_VERSION_MINOR @MRN_VERSION_MINOR@
-#define MRN_VERSION_PATCH @MRN_VERSION_PATCH@
-#define MRN_VERSION "@MRN_VERSION@"
-#define MRN_VERSION_STRING "MRN v@MRN_VERSION@"
+#include <string>
 
-constexpr int VERSION_MAJOR = @MRN_VERSION_MAJOR@;
-constexpr int VERSION_MINOR = @MRN_VERSION_MINOR@;
-constexpr int VERSION_PATCH = @MRN_VERSION_PATCH@;
+// 版本信息
+#define MRN_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define MRN_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define MRN_VERSION_PATCH @PROJECT_VERSION_PATCH@
+#define MRN_VERSION "@PROJECT_VERSION@"
+#define MRN_VERSION_STRING "MRN Compressor v@PROJECT_VERSION@"
+
+namespace mrn {
+    class Version {
+    public:
+        static int getMajor() { return @PROJECT_VERSION_MAJOR@; }
+        static int getMinor() { return @PROJECT_VERSION_MINOR@; }
+        static int getPatch() { return @PROJECT_VERSION_PATCH@; }
+        static std::string getString() { return "@PROJECT_VERSION@"; }
+        static std::string getFullString() { return "MRN Compressor v@PROJECT_VERSION@"; }
+    };
+}
