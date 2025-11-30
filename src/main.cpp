@@ -5,7 +5,7 @@
 #include "core/plugin_manager.h"
 #include "io/file_io.h"
 #include "utils/logger.h"
-
+#include "core/architecture.h"
 using namespace mrn;
 
 void printUsage() {
@@ -28,6 +28,9 @@ void printUsage() {
     std::cout << "  -v, --verbose      Verbose output" << std::endl;
     std::cout << "  --overwrite        Overwrite existing files" << std::endl;
     std::cout << "  -h, --help         Show this help" << std::endl;
+    std::cout << "MRN Compressor v2.0.0" << std::endl;
+    std::cout << "Platform: " << mrn::Architecture::getFullDescription() << std::endl;
+    std::cout << "Build: " << BUILD_TYPE << std::endl;
 }
 
 void listAvailableAlgorithms() {
