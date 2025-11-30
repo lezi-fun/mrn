@@ -53,9 +53,9 @@ jobs:
         cd build
         ctest --output-on-failure -C $BUILD_TYPE
 
-    - name: Collect binary
+    - name: Collect binary (Linux)
       run: |
-        # 查找可执行文件
+        # 查找可执行文件 - Linux 版本
         find build -name "mrn" -type f -executable | head -1 > binary_path.txt
         if [ ! -s binary_path.txt ]; then
           echo "Error: Binary not found!"
@@ -118,26 +118,47 @@ jobs:
         cd build
         ctest --output-on-failure -C $BUILD_TYPE
 
-    - name: Collect binary
+    - name: Collect binary (macOS)
       run: |
-        # 查找可执行文件
-        find build -name "mrn" -type f -executable | head -1 > binary_path.txt
+        # 查找可执行文件 - macOS 兼容版本
+        # macOS 的 find 不支持 -executable，使用 -perm 替代
+        find build -name "mrn" -type f -perm +111 | head -1 > binary_path.txt
+        
+        # 如果上面的方法找不到，尝试直接路径
         if [ ! -s binary_path.txt ]; then
-          echo "Error: Binary not found!"
-          find build -type f -executable
-          exit 1
+          echo "Trying alternative search methods..."
+          # 尝试常见的构建输出路径
+          if [ -f "build/mrn" ]; then
+            echo "build/mrn" > binary_path.txt
+          elif [ -f "build/Release/mrn" ]; then
+            echo "build/Release/mrn" > binary_path.txt
+          elif [ -f "build/bin/mrn" ]; then
+            echo "build/bin/mrn" > binary_path.txt
+          else
+            echo "Error: Binary not found in common locations!"
+            echo "Searching all files in build directory:"
+            find build -type f -name "*mrn*"
+            exit 1
+          fi
         fi
+        
         BINARY_PATH=$(cat binary_path.txt)
+        echo "Found binary at: $BINARY_PATH"
         cp "$BINARY_PATH" ${{ matrix.artifact_name }}
         chmod +x ${{ matrix.artifact_name }}
         
         # 验证文件
+        echo "File info:"
         file ${{ matrix.artifact_name }}
-        ./${{ matrix.artifact_name }} --version || echo "Version check failed but continuing..."
+        ls -la ${{ matrix.artifact_name }}
+        
+        # 尝试运行版本检查
+        echo "Version check:"
+        ./${{ matrix.artifact_name }} --version || ./${{ matrix.artifact_name }} -v || echo "Version check format not recognized"
         
         # 显示架构信息
         echo "Building for architecture: ${{ matrix.arch }}"
-        uname -m
+        echo "System architecture: $(uname -m)"
 
     - name: Upload macOS artifact
       uses: actions/upload-artifact@v4
