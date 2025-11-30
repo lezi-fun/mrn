@@ -9,36 +9,47 @@ option(MRN_BUILD_BENCHMARKS "Build benchmarks" OFF)
 # 编译器设置
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
-# 平台特定的编译选项
-if(MSVC)
-    # Windows/MSVC 设置
-    add_compile_options(/W4 /permissive-)
-    if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        add_compile_options(/O2 /Ob2 /DNDEBUG)
-    else()
-        add_compile_options(/Od /Zi /DDEBUG)
-    endif()
-else()
-    # GCC/Clang 设置
-    add_compile_options(-Wall -Wextra -Wpedantic)
-    if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        add_compile_options(-O3 -DNDEBUG)
-    else()
-        add_compile_options(-O0 -g -DDEBUG)
-    endif()
+# 检测目标架构
+if(CMAKE_SYSTEM_PROCESSOR)
+    message(STATUS "Target architecture: ${CMAKE_SYSTEM_PROCESSOR}")
 endif()
 
-# 配置版本头文件
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/core/version.h.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/include/core/version.h"
-    @ONLY
-)
+# 平台特定的编译选项
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(STATUS "Building for Linux")
+    add_compile_options(-Wall -Wextra -Wpedantic)
+    
+    # ARM64 特定优化
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
+        message(STATUS "Building for ARM64 architecture")
+        add_compile_options(-mcpu=native)
+    endif()
+    
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    message(STATUS "Building for macOS")
+    add_compile_options(-Wall -Wextra -Wpedantic)
+    
+    # Apple Silicon 特定设置
+    if(CMAKE_OSX_ARCHITECTURES MATCHES "arm64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
+        message(STATUS "Building for Apple Silicon (ARM64)")
+    elseif(CMAKE_OSX_ARCHITECTURES MATCHES "x86_64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+        message(STATUS "Building for Intel x86_64")
+    endif()
+    
+    # macOS 通用设置
+    add_compile_options(-stdlib=libc++)
+endif()
 
-# 创建版本头文件目录
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/core")
+# 优化设置
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_options(-O3 -DNDEBUG)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        add_compile_options(-march=native)
+    endif()
+else()
+    add_compile_options(-O0 -g -DDEBUG)
+endif()
 
 # 主可执行文件
 add_executable(mrn
@@ -62,16 +73,18 @@ add_executable(mrn
 target_include_directories(mrn PRIVATE 
     include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_BINARY_DIR}/include
 )
 
 # 依赖
 find_package(Threads REQUIRED)
 target_link_libraries(mrn PRIVATE Threads::Threads)
 
-# Windows 特定设置
-if(WIN32)
-    target_link_libraries(mrn PRIVATE ws2_32)  # Winsock library if needed
+# macOS 特定链接库
+if(APPLE)
+    find_library(CORE_FOUNDATION CoreFoundation)
+    if(CORE_FOUNDATION)
+        target_link_libraries(mrn PRIVATE ${CORE_FOUNDATION})
+    endif()
 endif()
 
 # 插件系统
@@ -79,39 +92,6 @@ if(MRN_BUILD_PLUGINS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/plugins/CMakeLists.
     add_subdirectory(plugins)
 endif()
 
-# 测试
-if(MRN_BUILD_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")
-    enable_testing()
-    add_subdirectory(tests)
-endif()
-
-# 安装配置
-install(TARGETS mrn
-    RUNTIME DESTINATION bin
-    BUNDLE DESTINATION bin
-)
-
-install(DIRECTORY include/ DESTINATION include/mrn
-    FILES_MATCHING PATTERN "*.h"
-)
-
-# 打包配置
-set(CPACK_PACKAGE_NAME "mrn-compressor")
-set(CPACK_PACKAGE_VENDOR "MRN Team")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Modular Compression Tool")
-set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
-set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "MRN")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
-
-if(WIN32)
-    set(CPACK_GENERATOR "ZIP")
-elseif(APPLE)
-    set(CPACK_GENERATOR "ZIP")
-else()
-    set(CPACK_GENERATOR "ZIP;TGZ")
-endif()
-
-include(CPack)
+# 安装
+install(TARGETS mrn DESTINATION bin)
+install(DIRECTORY include/ DESTINATION include/mrn)
