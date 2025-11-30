@@ -1,97 +1,264 @@
-cmake_minimum_required(VERSION 3.15)
-project(mrn_compressor VERSION 2.0.0 LANGUAGES CXX)
+name: Build and Release MRN
 
-# 核心选项
-option(MRN_BUILD_PLUGINS "Build plugin system" ON)
-option(MRN_BUILD_TESTS "Build tests" ON)
-option(MRN_BUILD_BENCHMARKS "Build benchmarks" OFF)
+on:
+  push:
+    tags:
+      - 'v*'  # 匹配 v 开头的标签，如 v2.0.0, v2.1.0
+  workflow_dispatch:  # 允许手动触发
+    inputs:
+      version:
+        description: '版本号 (例如: 2.0.0)'
+        required: true
+        default: '2.0.0'
 
-# 编译器设置
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+env:
+  BUILD_TYPE: Release
 
-# 检测目标架构
-if(CMAKE_SYSTEM_PROCESSOR)
-    message(STATUS "Target architecture: ${CMAKE_SYSTEM_PROCESSOR}")
-endif()
-
-# 平台特定的编译选项
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    message(STATUS "Building for Linux")
-    add_compile_options(-Wall -Wextra -Wpedantic)
+jobs:
+  build-linux:
+    name: Build MRN - Linux (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-22.04
+            artifact_name: mrn-linux-x86_64
+          - arch: aarch64
+            runner: ubuntu-22.04-arm
+            artifact_name: mrn-linux-aarch64
     
-    # ARM64 特定优化
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
-        message(STATUS "Building for ARM64 architecture")
-        add_compile_options(-mcpu=native)
-    endif()
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake ninja-build
+
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+          -DMRN_BUILD_TESTS=ON \
+          -DMRN_BUILD_PLUGINS=ON
+
+    - name: Build project
+      run: |
+        cmake --build build --config $BUILD_TYPE --parallel
+
+    - name: Run tests
+      run: |
+        cd build
+        ctest --output-on-failure -C $BUILD_TYPE
+
+    - name: Collect binary
+      run: |
+        # 查找可执行文件
+        find build -name "mrn" -type f -executable | head -1 > binary_path.txt
+        if [ ! -s binary_path.txt ]; then
+          echo "Error: Binary not found!"
+          find build -type f -executable
+          exit 1
+        fi
+        BINARY_PATH=$(cat binary_path.txt)
+        cp "$BINARY_PATH" ${{ matrix.artifact_name }}
+        chmod +x ${{ matrix.artifact_name }}
+        
+        # 验证文件
+        file ${{ matrix.artifact_name }}
+        ./${{ matrix.artifact_name }} --version || echo "Version check failed but continuing..."
+        
+        # 显示架构信息
+        echo "Building for architecture: ${{ matrix.arch }}"
+
+    - name: Upload Linux artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: ${{ matrix.artifact_name }}
+        retention-days: 7
+
+  build-macos:
+    name: Build MRN - macOS (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
+            runner: macos-12
+            artifact_name: mrn-macos-x86_64
+          - arch: arm64
+            runner: macos-latest
+            artifact_name: mrn-macos-arm64
     
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    message(STATUS "Building for macOS")
-    add_compile_options(-Wall -Wextra -Wpedantic)
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        brew update
+        brew install cmake ninja
+
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+          -DMRN_BUILD_TESTS=ON \
+          -DMRN_BUILD_PLUGINS=ON
+
+    - name: Build project
+      run: |
+        cmake --build build --config $BUILD_TYPE --parallel
+
+    - name: Run tests
+      run: |
+        cd build
+        ctest --output-on-failure -C $BUILD_TYPE
+
+    - name: Collect binary
+      run: |
+        # 查找可执行文件
+        find build -name "mrn" -type f -executable | head -1 > binary_path.txt
+        if [ ! -s binary_path.txt ]; then
+          echo "Error: Binary not found!"
+          find build -type f -executable
+          exit 1
+        fi
+        BINARY_PATH=$(cat binary_path.txt)
+        cp "$BINARY_PATH" ${{ matrix.artifact_name }}
+        chmod +x ${{ matrix.artifact_name }}
+        
+        # 验证文件
+        file ${{ matrix.artifact_name }}
+        ./${{ matrix.artifact_name }} --version || echo "Version check failed but continuing..."
+        
+        # 显示架构信息
+        echo "Building for architecture: ${{ matrix.arch }}"
+        uname -m
+
+    - name: Upload macOS artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: ${{ matrix.artifact_name }}
+        retention-days: 7
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-linux, build-macos]
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     
-    # Apple Silicon 特定设置
-    if(CMAKE_OSX_ARCHITECTURES MATCHES "arm64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
-        message(STATUS "Building for Apple Silicon (ARM64)")
-    elseif(CMAKE_OSX_ARCHITECTURES MATCHES "x86_64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
-        message(STATUS "Building for Intel x86_64")
-    endif()
-    
-    # macOS 通用设置
-    add_compile_options(-stdlib=libc++)
-endif()
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./artifacts
 
-# 优化设置
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    add_compile_options(-O3 -DNDEBUG)
-    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        add_compile_options(-march=native)
-    endif()
-else()
-    add_compile_options(-O0 -g -DDEBUG)
-endif()
+    - name: Determine version
+      id: version
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION="${GITHUB_REF#refs/tags/v}"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Building release for version: $VERSION"
 
-# 主可执行文件
-add_executable(mrn
-    src/main.cpp
-    src/core/compressor.cpp
-    src/core/plugin_manager.cpp
-    src/core/archive_format.cpp
-    src/algorithms/move_optimizer.cpp
-    src/algorithms/lz77_compressor.cpp
-    src/algorithms/huffman_encoder.cpp
-    src/algorithms/algorithm_registry.cpp
-    src/io/file_io.cpp
-    src/io/directory_scanner.cpp
-    src/io/archive_writer.cpp
-    src/utils/thread_pool.cpp
-    src/utils/progress_tracker.cpp
-    src/utils/logger.cpp
-)
+    - name: Prepare release assets
+      run: |
+        mkdir -p release_assets
+        
+        # 复制并重命名所有架构的文件
+        for artifact_dir in artifacts/*/; do
+          if [ -d "$artifact_dir" ]; then
+            artifact_name=$(basename "$artifact_dir")
+            for file in "$artifact_dir"/*; do
+              if [ -f "$file" ]; then
+                filename=$(basename "$file")
+                # 直接从artifact名称获取架构信息
+                new_name="${artifact_name}-v${{ steps.version.outputs.version }}"
+                cp "$file" "release_assets/$new_name"
+                echo "Added: $new_name"
+              fi
+            done
+          fi
+        done
+        
+        # 设置执行权限
+        chmod +x release_assets/*
+        
+        # 创建校验和文件
+        cd release_assets
+        sha256sum * > checksums.txt
+        
+        echo "Release assets:"
+        ls -la
+        echo "File types:"
+        file *
 
-# 包含目录
-target_include_directories(mrn PRIVATE 
-    include
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-
-# 依赖
-find_package(Threads REQUIRED)
-target_link_libraries(mrn PRIVATE Threads::Threads)
-
-# macOS 特定链接库
-if(APPLE)
-    find_library(CORE_FOUNDATION CoreFoundation)
-    if(CORE_FOUNDATION)
-        target_link_libraries(mrn PRIVATE ${CORE_FOUNDATION})
-    endif()
-endif()
-
-# 插件系统
-if(MRN_BUILD_PLUGINS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/plugins/CMakeLists.txt")
-    add_subdirectory(plugins)
-endif()
-
-# 安装
-install(TARGETS mrn DESTINATION bin)
-install(DIRECTORY include/ DESTINATION include/mrn)
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ steps.version.outputs.version }}
+        name: MRN Compressor v${{ steps.version.outputs.version }}
+        body: |
+          # MRN Compressor v${{ steps.version.outputs.version }}
+          
+          ## 📦 下载
+          选择适合您操作系统和架构的版本下载：
+          
+          ### Linux
+          - **x86_64**: `mrn-linux-x86_64-v${{ steps.version.outputs.version }}`
+          - **ARM64**: `mrn-linux-aarch64-v${{ steps.version.outputs.version }}`
+          
+          ### macOS
+          - **Intel x86_64**: `mrn-macos-x86_64-v${{ steps.version.outputs.version }}`
+          - **Apple Silicon (ARM64)**: `mrn-macos-arm64-v${{ steps.version.outputs.version }}`
+          
+          ## 🔒 校验和
+          下载后请验证文件完整性：
+          ```bash
+          sha256sum -c checksums.txt
+          ```
+          
+          ## 🚀 快速开始
+          ```bash
+          # 给文件添加执行权限 (Linux/macOS)
+          chmod +x mrn-linux-x86_64-v${{ steps.version.outputs.version }}
+          
+          # 查看帮助
+          ./mrn-linux-x86_64-v${{ steps.version.outputs.version }} --help
+          
+          # 压缩文件
+          ./mrn-linux-x86_64-v${{ steps.version.outputs.version }} -c document.txt
+          ```
+          
+          ## 🛠 特性
+          - 多算法压缩支持 (MoveRun, LZ77, Huffman)
+          - 智能文件类型检测
+          - 跨平台多架构支持
+          - 多线程处理
+          
+          ## 🏗 架构支持
+          | 平台 | 架构 | 状态 |
+          |------|------|------|
+          | Linux | x86_64 (Intel/AMD) | ✅ 支持 |
+          | Linux | AArch64 (ARM64) | ✅ 支持 |
+          | macOS | x86_64 (Intel) | ✅ 支持 |
+          | macOS | ARM64 (Apple Silicon) | ✅ 支持 |
+          
+          > 💡 **注意**: Windows 版本暂未提供，用户可在 Windows 上使用 WSL 运行 Linux 版本
+          
+          📖 [查看完整文档](https://github.com/${{ github.repository }}#readme)
+        files: |
+          release_assets/*
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
